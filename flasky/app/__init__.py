@@ -12,14 +12,15 @@ bootstrap = Bootstrap()
 mail = Mail()
 moment = Moment()
 db = SQLAlchemy()
+
 login_manager = LoginManager()
-login_manager.session_protection = 'strong'
-login_manager.login_view = 'auth.login'
+login_manager.session_protection = 'strong' # 可设置为None、basic、strong不同强度
+login_manager.login_view = 'auth.login'   # 设置登录页面的端点，加上蓝本名字
 
 def create_app(config_name):
     app = Flask(__name__)
     app.config.from_object(config[config_name])  # 将配置导入程序
-    config[config_name].init_app()
+    config[config_name].init_app(app)
 
     # 完成初始化过程
     bootstrap.init_app(app)
