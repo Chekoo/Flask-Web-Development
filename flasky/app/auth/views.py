@@ -10,6 +10,21 @@ from ..email import send_email
 from flask_login import current_user
 
 # 认证蓝本
+
+
+
+# 处理程序中过滤未确认的账户
+@auth.before_app_request
+def before_request():  # 让用户确认账户或执行其他账户管理操作
+    if current_user.is_authenticated:
+        current_user.ping()     # 更新已登录用户的访问时间
+        if not current_user.confirmed \
+            and request.endpoint \
+            and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
+            return redirect(url_for('auth.unconfirmed'))
+
+
+
 # 蓝本中的路由和视图函数
 @auth.route('/login', methods=['GET', 'POST'])
 def login():
@@ -67,14 +82,6 @@ def confirm(token):
     return redirect(url_for('main.index'))
 
 
-# 处理程序中过滤未确认的账户
-@auth.before_app_request
-def before_request():  # 让用户确认账户或执行其他账户管理操作
-    if current_user.is_authenticated \
-            and not current_user.confirmed \
-            and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
-        return redirect(url_for('auth.unconfirmed'))
-
 
 @auth.route('/unconfirmed')
 def unconfirmed():
@@ -84,12 +91,13 @@ def unconfirmed():
 
 
 # 重新发送账户确认邮件
-@auth.route('.confirm')
+@auth.route('/confirm')
 @login_required
 def resend_confirmation():
     token = current_user.generate_confirmation_token()
     send_email(current_user.email, 'Confirm Your Account', 'auth/email/confirm', user=current_user, token=token)
     flash('A new confirmation email has been sent to you by email.')
+    print current_user.email
     return redirect(url_for('main.index'))
 
 
@@ -166,3 +174,4 @@ def change_email(token):
     else:
         flash('Invalid request.')
     return redirect(url_for('main.index'))
+

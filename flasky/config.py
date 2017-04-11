@@ -8,17 +8,17 @@ class Config: # 包含通用配置，子类分别定义专用的配置
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'ubuntu'
     SQLALCHEMY_COMMIT_ON_TEARDOWN = True
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    MAIL_SERVER = 'smtp.googlemail.com'
-    MAIL_PORT = 587
+    MAIL_SERVER = 'smtp.163.com'  # 电子邮件服务器IP地址或主机名
+    MAIL_PORT = 25
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
-    FLASKY_MAIL_SENDER = 'Flasky Admin <a316296241@gmail.com>'
-    FLASKY_ADMIN = os.environ.get('FLASKY_ADMIN')
+    FLASKY_MAIL_SENDER = 'a316296241 <a316296241@163.com>'
+    FLASKY_ADMIN = 'a316296241@163.com' #('FLASKY_ADMIN')
 
     @staticmethod
-    def init_app(app): # 参数为程序实例
+    def init_app(app):  # 参数为程序实例
         pass
 
 
