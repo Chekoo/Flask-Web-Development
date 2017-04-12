@@ -16,6 +16,7 @@ class Config: # 包含通用配置，子类分别定义专用的配置
     FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
     FLASKY_MAIL_SENDER = 'a316296241 <a316296241@163.com>'
     FLASKY_ADMIN = 'a316296241@163.com' #('FLASKY_ADMIN')
+    FLASKY_POSTS_PER_PAGE = 20
 
     @staticmethod
     def init_app(app):  # 参数为程序实例
