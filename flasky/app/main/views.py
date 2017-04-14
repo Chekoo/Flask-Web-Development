@@ -114,3 +114,32 @@ def edit(id):
         return redirect(url_for('post', id=post.id))
     form.body.data = post.body
     return render_template('edit_post.html', form=form)
+
+# 关注 路由和视图函数
+@main.route('./follow/<username>')
+@login_required
+@permission_required(Permission.FOLLOW)
+def follow(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('Invalid user.')
+        return redirect(url_for('.index'))
+    if current_user.is_following(user):
+        flash('You are already following this user.')
+        return redirect(url_for('.user', username=username))
+    current_user.follow(user)
+    flash('You are now following %s.' % username )
+    return redirect(url_for('.user', username=username))
+
+# 关注者 路由和视图函数
+@main.route('/followers/<usernae>')
+def followers(username):
+    user = User.query.filter_by(username=username).first()
+    if user is None:
+        flash('Invalid user.')
+        return redirect(url_for('.index'))
+    page = request.args.get('page', 1, type=int)
+    pagination = user.followers.paginate(page, per_page=current_app.config['FLASKY_FOLLOWERS_PER_PAGE'], error_out=False)
+    follows = [{'user': item.follower, 'timestamp': item.timestamp} for item in pagination.items]
+    return render_template('followers.html', user=user, title="Followers of",
+                           endpoint='.followers', pagination=pagination, follows=follows)
