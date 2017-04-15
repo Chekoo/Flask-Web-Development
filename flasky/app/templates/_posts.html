@@ -30,7 +30,7 @@
                     <span class="label label-primary">Edit</span>
                 </a>
                 {% elif current_user.is_administrator() %}
-                <a href="{{ url_for('.edit', id=post.id }}">
+                <a href="{{ url_for('.edit', id=post.id) }}">
                     <span class="label label-danger">Edit [Admin]</span>
                 </a>
                 {% endif %}

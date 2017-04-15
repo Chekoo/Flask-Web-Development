@@ -11,8 +11,10 @@ class Config: # 包含通用配置，子类分别定义专用的配置
     MAIL_SERVER = 'smtp.163.com'  # 电子邮件服务器IP地址或主机名
     MAIL_PORT = 25
     MAIL_USE_TLS = True
-    MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
-    MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    # MAIL_USERNAME = os.environ.get('MAIL_USERNAME')
+    # MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
+    MAIL_USERNAME = 'a316296241@163.com'
+    MAIL_PASSWORD = 'cheko159'
     FLASKY_MAIL_SUBJECT_PREFIX = '[Flasky]'
     FLASKY_MAIL_SENDER = 'a316296241 <a316296241@163.com>'
     FLASKY_ADMIN = 'a316296241@163.com' #('FLASKY_ADMIN')
