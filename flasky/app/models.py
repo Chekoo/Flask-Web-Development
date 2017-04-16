@@ -85,7 +85,7 @@ class User(UserMixin, db.Model):
     followers = db.relationship('Follow', foreign_keys=[Follow.followed_id],
                                 backref=db.backref('followed', lazy='joined'),
                                 lazy='dynamic', cascade='all, delete-orphan')
-
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
     # 首先调用基类的构造函数，如果创建基类对象后还没定义角色，则根据电子邮件地址决定将其设为管理员还是默认角色
     def __init__(self, **kwargs):
@@ -243,7 +243,6 @@ class User(UserMixin, db.Model):
     def followed_posts(self):
         return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter_by(Follow.follower_id == self.id)
 
-
     # 把用户设为自己的关注者
     @staticmethod
     def add_self_follows():
@@ -281,6 +280,7 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     body_html = db.Column(db.Text)
+    comments = db.relationship('Comment', backref='author', lazy='dynamic')
 
     @staticmethod
     def generate_fake(count=100):
@@ -307,3 +307,21 @@ class Post(db.Model):
 
 # 注册在body字段上，是SQLAlchemy 'set'事件的监听程序，只要这个类的实例的body字段设了新值，函数就会被自动调用
 db.event.listen(Post.body, 'set', Post.on_changed_body)
+
+# 评论模型
+class Comment(db.Model):
+    __tablename__ = 'comments'
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text)
+    body_html = db.Column(db.Text)
+    timestamp = db.Columm(db.DateTime, index=True, default=datetime.utcfromtimestamp)
+    disabled = db.Column(db.Boolean)
+    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+
+    @staticmethod
+    def on_changed_body(target, value, oldvalue, initiator):
+        allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i', 'strong']
+        target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
+                                                       tags=allowed_tags, strip=True))
+db.event.listen(Comment.body, 'set', Comment.on_changed_body)
