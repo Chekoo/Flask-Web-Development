@@ -28,7 +28,7 @@
                 {% endif %}
             </ul>
             <ul>
-                {% if current_user.can(Permision.MODERATE_COMMENT) %}
+                {% if current_user.can(Permission.MODERATE_COMMENT) %}
                 <li><a href="{{ url_for('main.moderate') }}">Moderate Comments</a></li>
                 {% endif %}
             </ul>

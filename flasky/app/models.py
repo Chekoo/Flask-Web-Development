@@ -99,7 +99,6 @@ class User(UserMixin, db.Model):
             self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
         self.followed.append(Follow(followed=self))
 
-
     @property
     def password(self):
         raise AttributeError('password is not a readable attribute')
@@ -112,8 +111,6 @@ class User(UserMixin, db.Model):
     def verify_password(self, password):
         return check_password_hash(self.password_hash, password)
 
-
-
     # 生成确认信息令牌
     def generate_confirmation_token(self, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
@@ -121,9 +118,9 @@ class User(UserMixin, db.Model):
 
     # 确认，令牌信息是否一致
     def confirm(self, token):
-        s = Serializer(current_app.config['SERCET_KEY'])
+        s = Serializer(current_app.config['SECRET_KEY'])
         try:
-            data = s.load(token)
+            data = s.loads(token)
         except:
             return False
         if data.get('confirm') != self.id:
@@ -153,7 +150,7 @@ class User(UserMixin, db.Model):
     # 修改邮箱
     def generate_email_change_token(self, new_email, expiration=3600):
         s = Serializer(current_app.config['SECRET_KEY'], expiration)
-        return s.dumps({'change_eamil': self.id, 'new_email':new_email})
+        return s.dumps({'change_email': self.id, 'new_email': new_email})
 
     def change_email(self, token):
         s = Serializer(current_app.config['SECRET_KEY'])
@@ -195,7 +192,6 @@ class User(UserMixin, db.Model):
             self.email.encode('utf-8')).hexdigest()
         return '{url}/{hash}?s={size}&d={default}&r={rating}'.format(
             url=url, hash=hash, size=size, default=default, rating=rating)
-
 
     # 生成虚拟用户和博客文章
     @staticmethod
@@ -241,7 +237,7 @@ class User(UserMixin, db.Model):
     # 获取所关注用户的文章
     @property
     def followed_posts(self):
-        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter_by(Follow.follower_id == self.id)
+        return Post.query.join(Follow, Follow.followed_id == Post.author_id).filter(Follow.follower_id == self.id)
 
     # 把用户设为自己的关注者
     @staticmethod
@@ -306,7 +302,7 @@ class Post(db.Model):
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     body_html = db.Column(db.Text)
-    comments = db.relationship('Comment', backref='author', lazy='dynamic')
+    comments = db.relationship('Comment', backref='post', lazy='dynamic')
 
     @staticmethod
     def generate_fake(count=100):
@@ -355,20 +351,25 @@ class Post(db.Model):
 # 注册在body字段上，是SQLAlchemy 'set'事件的监听程序，只要这个类的实例的body字段设了新值，函数就会被自动调用
 db.event.listen(Post.body, 'set', Post.on_changed_body)
 
+
 # 评论模型
 class Comment(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
-    timestamp = db.Columm(db.DateTime, index=True, default=datetime.utcfromtimestamp)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcfromtimestamp)
     disabled = db.Column(db.Boolean)
-    author_id = db.Column(db.Integer, db.ForeignKey('user.id'))
-    post_id = db.Column(db.Integer, db.ForeignKey('post.id'))
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))
 
     @staticmethod
     def on_changed_body(target, value, oldvalue, initiator):
         allowed_tags = ['a', 'abbr', 'acronym', 'b', 'code', 'em', 'i', 'strong']
         target.body_html = bleach.linkify(bleach.clean(markdown(value, output_format='html'),
                                                        tags=allowed_tags, strip=True))
+
+    @staticmethod
+    def from_json(json_comment):
+        body = json_comment.get('body')
 db.event.listen(Comment.body, 'set', Comment.on_changed_body)

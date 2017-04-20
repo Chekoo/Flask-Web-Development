@@ -78,9 +78,8 @@ def confirm(token):
     if current_user.confirm(token):
         flash('You have confirmed your account. Thanks!')
     else:
-        flash('The cofirmation link is invalid or has expired.')
+        flash('The confirmation link is invalid or has expired.')
     return redirect(url_for('main.index'))
-
 
 
 @auth.route('/unconfirmed')

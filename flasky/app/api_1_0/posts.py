@@ -1,12 +1,9 @@
 #coding=utf-8
 from flask import jsonify, request, g, abort, url_for, current_app
-
 from .errors import  forbidden
 from ..models import db, Post, Permission
 from . import api
-from flasky.app.auth import auth
-from flasky.app.decorators import permission_required
-from flasky.app.models import Post, Permission
+from .decorators import permission_required
 
 
 # 文章资源GET请求的处理程序
@@ -30,10 +27,8 @@ def get_posts():  # 使用列表推导生成所有文章的JSON版本
     })
 
 
-
 # 返回单篇博客文章，如果没有找到指定id对应的文章，返回404,
 @api.route('/posts/<int:id>')
-@auth.login_required
 def get_post(id):
     post = Post.query.get_or_404(id)
     return jsonify(post.to_json())
