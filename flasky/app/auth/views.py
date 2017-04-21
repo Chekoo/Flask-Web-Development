@@ -12,17 +12,15 @@ from flask_login import current_user
 # 认证蓝本
 
 
-
 # 处理程序中过滤未确认的账户
 @auth.before_app_request
 def before_request():  # 让用户确认账户或执行其他账户管理操作
     if current_user.is_authenticated:
         current_user.ping()     # 更新已登录用户的访问时间
         if not current_user.confirmed \
-            and request.endpoint \
-            and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
+                and request.endpoint \
+                and request.endpoint[:5] != 'auth.' and request.endpoint != 'static':
             return redirect(url_for('auth.unconfirmed'))
-
 
 
 # 蓝本中的路由和视图函数
@@ -115,6 +113,7 @@ def change_password():
             flash('Invalid password.')
     return render_template('auth/change_password.html', form=form)
 
+
 # 重设密码，发送包含令牌的邮件,进行验证
 @auth.route('/reset', methods=['GET', 'POST'])
 def password_reset_request():
@@ -131,6 +130,7 @@ def password_reset_request():
         flash('An email with instructions to reset your password has been sent to you.')
         return redirect(url_for('auth.login'))
     return render_template('auth/reset_password.html', form=form)
+
 
 @auth.route('/reset/<token>', methods=['GET', 'POST'])
 def password_reset(token):
@@ -163,6 +163,7 @@ def change_email_request():
         else:
             flash('Invalid email or password.')
     return render_template('auth/change_email.html', form=form)
+
 
 # 修改邮箱
 @auth.route('/change_email/<token>')

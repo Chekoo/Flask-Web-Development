@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import render_template, session, redirect, url_for, abort, flash, request, current_app, make_response
 from flask_login import login_required
 from . import main
-from .forms import NameForm, EditProfileForm, PostForm, CommentForm
+from .forms import NameForm, EditProfileForm, PostForm, CommentForm, EditProfileAdminForm
 from .. import db
 from ..models import User, Role, Post, Comment
 from ..decorators  import admin_required, permission_required
@@ -84,9 +84,9 @@ def edit_profile():
 @admin_required
 def edit_profile_admin(id):
     user = User.query.get_or_404(id)  # 如果提供的id不正确，返回404错误
-    form = EditProfileForm(user=user)
+    form = EditProfileAdminForm(user=user)
     if form.validate_on_submit():
-        user.email = form.emial.data
+        user.email = form.email.data
         user.username = form.username.data
         user.confirmed = form.confirmed.data
         user.role = Role.query.get(form.role.data)
@@ -98,7 +98,7 @@ def edit_profile_admin(id):
         return redirect(url_for('.user', username=user.username))
     form.email.data = user.email
     form.username.data = user.username
-    form.confirmed.data = user.confiremed
+    form.confirmed.data = user.confirmed
     form.role.data = user.role_id
     form.name.data = user.name
     form.location.data = user.location
@@ -200,7 +200,7 @@ def followed_by(username):
     page = request.args.get('page', 1, type=int)
     pagination = user.followed.paginate(page, per_page=current_app.config['FLASKY_FOLLOWERS_PER_PAGE'], error_out=False)
     follows = [{'user': item.followed, 'timestamp': item.timestamp} for item in pagination.items]
-    return render_template('followers.html', user=user, title='Followed by', endpoint='.followed by', pagination=pagination, follows=follows)
+    return render_template('followers.html', user=user, title="Followed by", endpoint='.followed_by', pagination=pagination, follows=follows)
 
 
 # 查询所以文章还是所关注用户的文章, show_followed在响应对象中设置，这两个路由不能依赖Flask，使用make_response创建响应对象
@@ -215,7 +215,7 @@ def show_all():
 @main.route('/followed')
 @login_required
 def show_followed():
-    resp = make_response(url_for('.index'))
+    resp = make_response(redirect(url_for('.index')))
     resp.set_cookie('show_followed', '1', max_age=30*24*60*60)
     return resp
 
@@ -227,7 +227,7 @@ def show_followed():
 def moderate():
     page = request.args.get('page', 1, type=int)
     pagination = Comment.query.order_by(Comment.timestamp.desc()).paginate(
-        page, per_page=current_app.config['FLASKY_COMMENT_PER_PAGE'], error_out=False)
+        page, per_page=current_app.config['FLASKY_COMMENTS_PER_PAGE'], error_out=False)
     comments = pagination.items
     return render_template('moderate.html', comments=comments, pagination=pagination, page=page)
 

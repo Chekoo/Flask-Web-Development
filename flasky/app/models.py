@@ -21,6 +21,7 @@ class Permission:
     MODERATE_COMMENTS = 0x08
     ADMINISTER = 0x80
 
+
 # 角色权限表
 class Role(db.Model):
     __tablename__ = 'roles'
@@ -96,7 +97,8 @@ class User(UserMixin, db.Model):
             if self.role is None:
                 self.role = Role.query.filter_by(default=True).first()
         if self.email is not None and self.avatar_hash is None:
-            self.avatar_hash = hashlib.md5(self.email.encode('utf-8')).hexdigest()
+            self.avatar_hash = hashlib.md5(
+                self.email.encode('utf-8')).hexdigest()
         self.followed.append(Follow(followed=self))
 
     @property
@@ -172,7 +174,7 @@ class User(UserMixin, db.Model):
 
     # 检查用户是否有指定的权限
     def can(self, permissions):
-        return self.role is not None and (self.role.perimissions & permissions) == permissions
+        return self.role is not None and (self.role.permissions & permissions) == permissions
 
     def is_administrator(self):
         return self.can(Permission.ADMINISTER)
@@ -288,6 +290,7 @@ class AnonymousUser(AnonymousUserMixin):
 
 login_manager.anonymous_user = AnonymousUser
 
+
 # 加载用户的回调函数,实现一个回调函数，使用指定的标识符加载用户。
 @login_manager.user_loader
 def load_user(user_id):
@@ -358,7 +361,7 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     body = db.Column(db.Text)
     body_html = db.Column(db.Text)
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcfromtimestamp)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
     disabled = db.Column(db.Boolean)
     author_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     post_id = db.Column(db.Integer, db.ForeignKey('posts.id'))

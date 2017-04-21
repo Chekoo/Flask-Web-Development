@@ -5,9 +5,11 @@ from wtforms.validators import Required, Length, Email, Regexp
 from ..models import Role, User
 from flask_pagedown.fields import PageDownField
 
+
 class NameForm(FlaskForm):
     name = StringField('What is your name?', validators=[Required()])
     submit = SubmitField('Submit')
+
 
 # 资料编辑表单
 class EditProfileForm(FlaskForm):
@@ -16,9 +18,10 @@ class EditProfileForm(FlaskForm):
     about_me = TextAreaField('About me')
     submit = SubmitField('Submit')
 
+
 # 管理员使用的资料编辑表单
 class EditProfileAdminForm(FlaskForm):
-    email = StringField('Email', validators=[Required(), Length(1, 64),Email()])
+    email = StringField('Email', validators=[Required(), Length(1, 64), Email()])
     username = StringField('Username', validators=[Required(), Length(1, 64), Regexp('^[A-Za-z0-9_.]*$', 0,
                                                    'Usernames must have only letters,' 'numbers, dots or underscores')])
     confirmed = BooleanField('Confirmed')
@@ -40,13 +43,16 @@ class EditProfileAdminForm(FlaskForm):
     def validate_username(self, field):
         if field.data != self.user.username and User.query.filter_by(username=field.data).first():
             raise ValidationError('Username already in use.')
+
+
 # 博客文章表单
 class PostForm(FlaskForm):
     body = PageDownField("What's on your mind?", validators=[Required()])
     submit = SubmitField('Submit')
 
+
 # 评论输入表单
-class CommentForm():
+class CommentForm(FlaskForm):
     body = StringField('', validators=[Required()])
     submit = SubmitField('Submit')
 
