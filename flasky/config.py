@@ -19,6 +19,8 @@ class Config: # 包含通用配置，子类分别定义专用的配置
     FLASKY_POSTS_PER_PAGE = 20
     FLASKY_FOLLOWERS_PER_PAGE = 50
     FLASKY_COMMENTS_PER_PAGE = 30
+    SQLALCHEMY_RECORD_QUERIES = True  # 告诉sqlchemy启用记录查询统计数字的功能
+    FLASKY_SLOW_DB_QUERY_TIME = 0.5  # 缓慢查询的阀值为0.5秒
 
     @staticmethod
     def init_app(app):  # 参数为程序实例
