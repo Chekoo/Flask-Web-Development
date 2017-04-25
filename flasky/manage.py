@@ -18,7 +18,6 @@ manager = Manager(app)
 migrate = Migrate(app, db)
 
 
-
 def make_shell_context():
     return dict(app=app, db=db, User=User, Follow=Follow, Role=Role,
                 Permission=Permission, Post=Post, Comment=Comment)
@@ -47,6 +46,7 @@ def test(coverage=False):
         print('HTML version: file://%s/index.html' % covdir)
         COV.erase()
 
+
 # 在请求分析器的监视下运行程序
 @manager.command
 def profile(length=25, profile_dir=None):
@@ -54,6 +54,23 @@ def profile(length=25, profile_dir=None):
     from werkzeug.contrib.profiler import ProfilerMiddleware
     app.wsgi_app = ProfilerMiddleware(app.wsgi_app, restrictions=[length], profile_dir=profile_dir)
     app.run()
+
+
+# 部署命令
+@manager.command
+def deploy():
+    """Run delopyment tasks."""
+    from flask_migrate import upgrade
+    from app.models import Role, User
+
+    # 把数据库迁移到最新修订版本
+    upgrade()
+
+    # 创建用户角色
+    Role.insert_roles()
+
+    # 让所有用户都关注此用户
+    User.add_self_follows()
 
 
 if __name__ == '__main__':

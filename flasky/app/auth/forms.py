@@ -30,6 +30,7 @@ class RegistrationForm(FlaskForm):
         if User.query.filter_by(username=field.data).first():
             raise ValidationError('Username already in use.')
 
+
 # 修改密码页面
 class ChangePasswordForm(FlaskForm):
     old_password = PasswordField('Old password', validators=[Required()])
@@ -38,10 +39,12 @@ class ChangePasswordForm(FlaskForm):
     password2 = PasswordField('Confirm new password', validators=[Required()])
     submit = SubmitField('Update Password')
 
+
 # 重设密码页面，将发送邮件，确认后进入详细页面
 class PasswordResetRequestForm(FlaskForm):
-    email =  StringField('Email', validators=[Required(), Length(1, 64), Email()])
+    email = StringField('Email', validators=[Required(), Length(1, 64), Email()])
     submit = SubmitField('Reset Password')
+
 
 # 重设密码详细页面
 class PasswordRestForm(FlaskForm):
@@ -53,14 +56,16 @@ class PasswordRestForm(FlaskForm):
 
     def validate_on_submit(self, field):
         if User.query.filter_by(mail=field.data).first() is None:
-            raise ValidationError('Unknown eamil address')
+            raise ValidationError('Unknown email address')
+
 
 # 修改邮箱页面
 class ChangeEmailForm(FlaskForm):
-    email = StringField('New Email', validators=[Required(), Length(1, 64), Email()])
+    email = StringField('New Email', validators=[Required(), Length(1, 64),
+                                                 Email()])
     password = PasswordField('Password', validators=[Required()])
-    submit = SubmitField('Update Emaili Address')
+    submit = SubmitField('Update Email Address')
 
-    def validate_on_submit(self, field):
+    def validate_email(self, field):
         if User.query.filter_by(email=field.data).first():
             raise ValidationError('Email already registered.')
