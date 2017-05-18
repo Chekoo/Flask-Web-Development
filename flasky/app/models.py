@@ -13,6 +13,7 @@ from markdown import markdown
 import bleach
 from .exceptions import ValidationError
 
+
 # 权限常量
 class Permission:
     FOLLOW = 0x01
